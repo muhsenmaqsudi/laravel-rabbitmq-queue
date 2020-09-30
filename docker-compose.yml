@@ -9,13 +9,14 @@ services:
     depends_on:
       - db
       - redis
+      - rabbitmq
     volumes:
       - ./:/srv
     environment:
       DB_HOST: db
       REDIS_HOST: redis
       CACHE_DRIVER: redis
-      QUEUE_CONNECTION: redis
+      QUEUE_CONNECTION: rabbitmq
   db:
     image: mysql:8
     container_name: laravel_progress_db
@@ -51,14 +52,22 @@ services:
     restart: always
     ports:
       - "16379:6379"
-  worker:
-    build:
-      context: ./.docker/php-worker
-      dockerfile: Dockerfile
-    container_name: laravel_progress_worker
-    restart: unless-stopped
-    volumes:
-      - ./:/srv
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 15672:15672
+      - 5672:5672
+#    environment:
+#      RABBITMQ_DEFAULT_USER: maqsudi
+#      RABBITMQ_DEFAULT_PASS: mqf121810
+#  worker:
+#    build:
+#      context: ./.docker/php-worker
+#      dockerfile: Dockerfile
+#    container_name: laravel_progress_worker
+#    restart: unless-stopped
+#    volumes:
+#      - ./:/srv
 
   composer:
     image: composer:latest
